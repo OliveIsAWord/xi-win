@@ -9,8 +9,8 @@ description = "Windows front-end for xi editor."
 directwrite = "0.1.2"
 direct2d = "0.2.0"
 
-xi-core-lib = { git = "https://github.com/xi-editor/xi-editor" }
-xi-rpc = { git = "https://github.com/xi-editor/xi-editor" }
+xi-core-lib = { git = "https://github.com/OliveIsAWord/xi-editor" }
+xi-rpc = { git = "https://github.com/OliveIsAWord/xi-editor" }
 serde = "1.0"
 serde_json = "1.0"
 
@@ -21,5 +21,5 @@ git = "https://github.com/xi-editor/druid"
 git = "https://github.com/xi-editor/druid"
 
 [dependencies.winapi]
-version = "0.3.6"
+version = "0.3.9"
 features = ["d2d1_1", "dwrite", "winbase", "libloaderapi", "errhandlingapi", "winuser", "shellscalingapi", "shobjidl", "combaseapi", "synchapi"]

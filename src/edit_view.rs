@@ -127,7 +127,7 @@ impl Widget for EditView {
         LayoutResult::Size(size)
     }
 
-    fn mouse(&mut self, event: &MouseEvent, _ctx: &mut HandlerCtx) -> bool { 
+    fn mouse(&mut self, event: &MouseEvent, _ctx: &mut HandlerCtx) -> bool {
         let MouseEvent { x, y, mods: _, which, count } = *event;
         if which == MouseButton::Left && count == 1 {
             let (line, col) = self.xy_to_line_col(x, y);
@@ -141,7 +141,7 @@ impl Widget for EditView {
         false
     }
 
-    fn poke(&mut self, payload: &mut Any, ctx: &mut HandlerCtx) -> bool { 
+    fn poke(&mut self, payload: &mut dyn Any, ctx: &mut HandlerCtx) -> bool {
         if let Some(cmd) = payload.downcast_ref::<EditViewCommands>() {
             match cmd {
                 EditViewCommands::ViewId(view_id) => {
@@ -254,13 +254,13 @@ impl EditView {
         }
     }
 
-    pub fn rebuild_resources(&mut self) {
-        self.resources = None;
-    }
+    // pub fn rebuild_resources(&mut self) {
+    //     self.resources = None;
+    // }
 
-    pub fn clear_line_cache(&mut self) {
-        self.line_cache = LineCache::new();
-    }
+    // pub fn clear_line_cache(&mut self) {
+    //     self.line_cache = LineCache::new();
+    // }
 
     // signature will change when we start caching
     fn get_text_line(&self, line_num: usize) -> Option<TextLine> {
@@ -445,13 +445,13 @@ impl EditView {
         true
     }
 
-    pub fn mouse_wheel(&mut self, delta: i32, _mods: u32) {
-        // TODO: scale properly, taking SPI_GETWHEELSCROLLLINES into account
-        let scroll_scaling = 0.5;
-        self.scroll_offset -= (delta as f32) * scroll_scaling;
-        self.constrain_scroll();
-        self.update_viewport();
-    }
+    // pub fn mouse_wheel(&mut self, delta: i32, _mods: u32) {
+    //     // TODO: scale properly, taking SPI_GETWHEELSCROLLLINES into account
+    //     let scroll_scaling = 0.5;
+    //     self.scroll_offset -= (delta as f32) * scroll_scaling;
+    //     self.constrain_scroll();
+    //     self.update_viewport();
+    // }
 
     fn constrain_scroll(&mut self) {
         let max_scroll = TOP_PAD + LINE_SPACE *
