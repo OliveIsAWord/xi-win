@@ -54,7 +54,7 @@ impl Core {
     ///
     /// The handler is invoked for incoming RPC notifications. Note that
     /// it must be `Send` because it is called from a dedicated thread.
-    pub fn new<H>(xi_peer: XiPeer, rx: Receiver<Value>, handler: H) -> Core
+    pub fn new<H>(xi_peer: XiPeer, rx: Receiver<Value>, handler: H) -> Self
     where
         H: Handler + Send + 'static,
     {
@@ -63,7 +63,7 @@ impl Core {
             id: 0,
             pending: BTreeMap::new(),
         };
-        let core = Core {
+        let core = Self {
             state: Arc::new(Mutex::new(state)),
         };
         let rx_core_handle = core.clone();
@@ -73,11 +73,9 @@ impl Core {
                     handler.notification(method, &msg["params"]);
                 } else if let Some(id) = msg["id"].as_u64() {
                     let mut state = rx_core_handle.state.lock().unwrap();
-                    if let Some(callback) = state.pending.remove(&id) {
+                    state.pending.remove(&id).map_or_else(|| eprintln!("unexpected result"), |callback| {
                         callback.call(&msg["result"]);
-                    } else {
-                        println!("unexpected result")
-                    }
+                     })
                 } else {
                     println!("got {:?} at rpc level", msg);
                 }

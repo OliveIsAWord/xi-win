@@ -76,8 +76,8 @@ struct AppState {
 }
 
 impl AppState {
-    fn new() -> AppState {
-        AppState {
+    fn new() -> Self {
+        Self {
             focused: Default::default(),
             views: HashMap::new(),
         }
@@ -102,8 +102,8 @@ struct App {
 }
 
 impl App {
-    fn new(core: Core) -> App {
-        App {
+    fn new(core: Core) -> Self {
+        Self {
             core: Arc::new(Mutex::new(core)),
             state: Arc::new(Mutex::new(AppState::new())),
         }
@@ -186,8 +186,8 @@ struct AppDispatcher {
 }
 
 impl AppDispatcher {
-    fn new() -> AppDispatcher {
-        AppDispatcher {
+    fn new() -> Self {
+        Self {
             app: Default::default(),
         }
     }

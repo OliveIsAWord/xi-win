@@ -33,7 +33,7 @@ pub struct StyleSpan {
 }
 
 impl Line {
-    pub fn from_json(v: &Value) -> Line {
+    pub fn from_json(v: &Value) -> Self {
         let text = v["text"].as_str().unwrap().to_owned();
         let mut cursor = Vec::new();
         if let Some(arr) = v["cursor"].as_array() {
@@ -60,7 +60,7 @@ impl Line {
                 ix = end;
             }
         }
-        Line {
+        Self {
             text,
             cursor,
             styles,
@@ -85,8 +85,8 @@ pub struct LineCache {
 }
 
 impl LineCache {
-    pub fn new() -> LineCache {
-        LineCache { lines: Vec::new() }
+    pub const fn new() -> Self {
+        Self { lines: Vec::new() }
     }
 
     fn push_opt_line(&mut self, line: Option<Line>) {
@@ -94,7 +94,7 @@ impl LineCache {
     }
 
     pub fn apply_update(&mut self, update: &Value) {
-        let old_cache = mem::replace(self, LineCache::new());
+        let old_cache = mem::replace(self, Self::new());
         let mut old_iter = old_cache.lines.into_iter();
         for op in update["ops"].as_array().unwrap() {
             let op_type = &op["op"];

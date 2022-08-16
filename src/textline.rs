@@ -39,7 +39,7 @@ impl TextLine {
         line: &Line,
         factory: &directwrite::Factory,
         format: &TextFormat,
-    ) -> TextLine {
+    ) -> Self {
         let text = line.text();
         let trimmed_text = text.trim_end_matches(|c| c == '\r' || c == '\n');
         let layout = TextLayout::create(factory)
@@ -49,7 +49,7 @@ impl TextLine {
             .with_height(1e6)
             .build()
             .unwrap();
-        TextLine {
+        Self {
             layout,
             cursor: line.cursor().to_owned(),
             styles: line.styles().to_vec(),

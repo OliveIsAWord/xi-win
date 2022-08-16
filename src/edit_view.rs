@@ -229,8 +229,8 @@ impl Widget for EditView {
 }
 
 impl EditView {
-    pub fn new() -> EditView {
-        EditView {
+    pub fn new() -> Self {
+        Self {
             view_id: Default::default(),
             line_cache: LineCache::new(),
             dwrite_factory: directwrite::Factory::new().unwrap(),
@@ -488,7 +488,7 @@ impl EditView {
     // }
 
     fn constrain_scroll(&mut self) {
-        let max_scroll = TOP_PAD + LINE_SPACE * (self.line_cache.height().saturating_sub(1)) as f32;
+        let max_scroll = LINE_SPACE.mul_add(self.line_cache.height().saturating_sub(1) as f32, TOP_PAD);
         if self.scroll_offset < 0.0 {
             self.scroll_offset = 0.0;
         } else if self.scroll_offset > max_scroll {
@@ -522,7 +522,7 @@ impl EditView {
 
     /// Convert line number to y coordinate in content space.
     fn line_to_content_y(&self, line: usize) -> f32 {
-        TOP_PAD + (line as f32) * LINE_SPACE
+        (line as f32).mul_add(LINE_SPACE, TOP_PAD)
     }
 
     fn update_viewport(&mut self) {
@@ -547,7 +547,7 @@ impl EditView {
 }
 
 // Helper function for choosing between normal and shifted action
-fn s<'a>(mods: u32, normal: &'a str, shifted: &'a str) -> &'a str {
+const fn s<'a>(mods: u32, normal: &'a str, shifted: &'a str) -> &'a str {
     if (mods & M_SHIFT) != 0 {
         shifted
     } else {
