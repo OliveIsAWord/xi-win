@@ -15,7 +15,7 @@
 //! Configuration and runtime for the main window's menus.
 
 use winapi::shared::minwindef::WORD;
-use winapi::um::winuser::*;
+use winapi::um::winuser::{ACCEL, FCONTROL, FSHIFT, FVIRTKEY};
 
 use druid_win_shell::menu::Menu;
 use druid_win_shell::win_main::RunLoop;

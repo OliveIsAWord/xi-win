@@ -22,10 +22,13 @@ use std::sync::{Mutex, Weak};
 
 use serde_json::Value;
 
-use winapi::um::winuser::*;
+use winapi::um::winuser::{
+    VK_BACK, VK_DELETE, VK_DOWN, VK_END, VK_ESCAPE, VK_HOME, VK_LEFT, VK_NEXT, VK_OEM_4, VK_OEM_6,
+    VK_PRIOR, VK_RETURN, VK_RIGHT, VK_TAB, VK_UP,
+};
 
 use direct2d::brush::SolidColorBrush;
-use direct2d::math::*;
+use direct2d::math::RectF;
 use direct2d::RenderTarget;
 use directwrite;
 use directwrite::TextFormat;
@@ -43,7 +46,7 @@ use linecache::LineCache;
 use rpc::Core;
 use textline::TextLine;
 
-/// The commands the EditView widget accepts through `poke`.
+/// The commands the [`EditView`] widget accepts through `poke`.
 pub enum EditViewCommands {
     ViewId(String),
     ApplyUpdate(Value),
@@ -100,14 +103,14 @@ impl Widget for EditView {
         let last_line = min(self.y_to_line(self.size.1) + 1, self.line_cache.height());
 
         let x0 = LEFT_PAD;
-        let mut y = self.line_to_content_y(first_line) - self.scroll_offset;
+        let mut y = line_to_content_y(first_line) - self.scroll_offset;
         for line_num in first_line..last_line {
             if let Some(textline) = self.get_text_line(line_num) {
                 textline.draw_bg(rt, x0, y, &resources.sel);
             }
             y += LINE_SPACE;
         }
-        let mut y = self.line_to_content_y(first_line) - self.scroll_offset;
+        let mut y = line_to_content_y(first_line) - self.scroll_offset;
         for line_num in first_line..last_line {
             if let Some(textline) = self.get_text_line(line_num) {
                 textline.draw_text(rt, x0, y, &resources.fg);
@@ -231,15 +234,15 @@ impl Widget for EditView {
 impl EditView {
     pub fn new() -> Self {
         Self {
-            view_id: Default::default(),
+            view_id: None,
             line_cache: LineCache::new(),
             dwrite_factory: directwrite::Factory::new().unwrap(),
             resources: None,
             scroll_offset: 0.0,
             size: (0.0, 0.0),
             viewport: 0..0,
-            core: Default::default(),
-            pending: Default::default(),
+            core: Weak::new(),
+            pending: vec![],
         }
     }
 
@@ -256,15 +259,15 @@ impl EditView {
             .unwrap();
         Resources {
             fg: SolidColorBrush::create(rt)
-                .with_color(0xf0f0ea)
+                .with_color(0x00f0_f0ea)
                 .build()
                 .unwrap(),
             bg: SolidColorBrush::create(rt)
-                .with_color(0x272822)
+                .with_color(0x0027_2822)
                 .build()
                 .unwrap(),
             sel: SolidColorBrush::create(rt)
-                .with_color(0x49483e)
+                .with_color(0x0049_483e)
                 .build()
                 .unwrap(),
             text_format,
@@ -371,27 +374,27 @@ impl EditView {
             }
             VK_LEFT => {
                 // TODO: there is a subtle distinction between alt and ctrl
-                let action = if (mods & (M_ALT | M_CTRL)) != 0 {
+                let action = if (mods & (M_ALT | M_CTRL)) == 0 {
+                    s(mods, "move_left", "move_left_and_modify_selection")
+                } else {
                     s(
                         mods,
                         "move_word_left",
                         "move_word_left_and_modify_selection",
                     )
-                } else {
-                    s(mods, "move_left", "move_left_and_modify_selection")
                 };
                 self.send_action(action);
             }
             VK_RIGHT => {
                 // TODO: there is a subtle distinction between alt and ctrl
-                let action = if (mods & (M_ALT | M_CTRL)) != 0 {
+                let action = if (mods & (M_ALT | M_CTRL)) == 0 {
+                    s(mods, "move_right", "move_right_and_modify_selection")
+                } else {
                     s(
                         mods,
                         "move_word_right",
                         "move_word_right_and_modify_selection",
                     )
-                } else {
-                    s(mods, "move_right", "move_right_and_modify_selection")
                 };
                 self.send_action(action);
             }
@@ -406,33 +409,33 @@ impl EditView {
                 ));
             }
             VK_HOME => {
-                let action = if (mods & M_CTRL) != 0 {
-                    s(
-                        mods,
-                        "move_to_beginning_of_document",
-                        "move_to_beginning_of_document_and_modify_selection",
-                    )
-                } else {
+                let action = if (mods & M_CTRL) == 0 {
                     s(
                         mods,
                         "move_to_left_end_of_line",
                         "move_to_left_end_of_line_and_modify_selection",
                     )
+                } else {
+                    s(
+                        mods,
+                        "move_to_beginning_of_document",
+                        "move_to_beginning_of_document_and_modify_selection",
+                    )
                 };
                 self.send_action(action);
             }
             VK_END => {
-                let action = if (mods & M_CTRL) != 0 {
-                    s(
-                        mods,
-                        "move_to_end_of_document",
-                        "move_to_end_of_document_and_modify_selection",
-                    )
-                } else {
+                let action = if (mods & M_CTRL) == 0 {
                     s(
                         mods,
                         "move_to_right_end_of_line",
                         "move_to_right_end_of_line_and_modify_selection",
+                    )
+                } else {
+                    s(
+                        mods,
+                        "move_to_end_of_document",
+                        "move_to_end_of_document_and_modify_selection",
                     )
                 };
                 self.send_action(action);
@@ -441,20 +444,20 @@ impl EditView {
                 self.send_action("cancel_operation");
             }
             VK_BACK => {
-                let action = if (mods & M_CTRL) != 0 {
+                let action = if (mods & M_CTRL) == 0 {
+                    "delete_backward"
+                } else {
                     // should be "delete to beginning of paragraph" but not supported
                     s(mods, "delete_word_backward", "delete_to_beginning_of_line")
-                } else {
-                    "delete_backward"
                 };
                 self.send_action(action);
             }
             VK_DELETE => {
-                let action = if (mods & M_CTRL) != 0 {
-                    s(mods, "delete_word_forward", "delete_to_end_of_paragraph")
-                } else {
+                let action = if (mods & M_CTRL) == 0 {
                     // TODO: shift-delete should be "delete line"
                     "delete_forward"
+                } else {
+                    s(mods, "delete_word_forward", "delete_to_end_of_paragraph")
                 };
                 self.send_action(action);
             }
@@ -488,7 +491,8 @@ impl EditView {
     // }
 
     fn constrain_scroll(&mut self) {
-        let max_scroll = LINE_SPACE.mul_add(self.line_cache.height().saturating_sub(1) as f32, TOP_PAD);
+        let max_scroll =
+            LINE_SPACE.mul_add(self.line_cache.height().saturating_sub(1) as f32, TOP_PAD);
         if self.scroll_offset < 0.0 {
             self.scroll_offset = 0.0;
         } else if self.scroll_offset > max_scroll {
@@ -520,11 +524,6 @@ impl EditView {
         (line_num, col)
     }
 
-    /// Convert line number to y coordinate in content space.
-    fn line_to_content_y(&self, line: usize) -> f32 {
-        (line as f32).mul_add(LINE_SPACE, TOP_PAD)
-    }
-
     fn update_viewport(&mut self) {
         let first_line = self.y_to_line(0.0);
         let last_line = first_line + ((self.size.1 / LINE_SPACE).floor() as usize) + 1;
@@ -536,21 +535,26 @@ impl EditView {
     }
 
     pub fn scroll_to(&mut self, line: usize) {
-        let y = self.line_to_content_y(line);
+        let y = line_to_content_y(line);
         let bottom_slop = 20.0;
         if y < self.scroll_offset {
             self.scroll_offset = y;
         } else if y > self.scroll_offset + self.size.1 - bottom_slop {
-            self.scroll_offset = y - (self.size.1 - bottom_slop)
+            self.scroll_offset = y - (self.size.1 - bottom_slop);
         }
     }
 }
 
 // Helper function for choosing between normal and shifted action
 const fn s<'a>(mods: u32, normal: &'a str, shifted: &'a str) -> &'a str {
-    if (mods & M_SHIFT) != 0 {
-        shifted
-    } else {
+    if (mods & M_SHIFT) == 0 {
         normal
+    } else {
+        shifted
     }
+}
+
+/// Convert line number to y coordinate in content space.
+fn line_to_content_y(line: usize) -> f32 {
+    (line as f32).mul_add(LINE_SPACE, TOP_PAD)
 }

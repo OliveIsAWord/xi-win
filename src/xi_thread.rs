@@ -35,7 +35,7 @@ pub struct XiPeer {
 
 impl XiPeer {
     pub fn send(&self, s: String) {
-        let _ = self.tx.send(s);
+        let _ignore = self.tx.send(s);
     }
 
     pub fn send_json(&self, v: &Value) {

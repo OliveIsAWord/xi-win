@@ -19,6 +19,14 @@
 // that it is an invalid handle (either -1 or 0), then we can open up
 // up a file to log stdout and SetStdHandle.
 #![windows_subsystem = "windows"]
+#![allow(
+    clippy::cast_possible_truncation,
+    clippy::cast_possible_wrap,
+    clippy::cast_precision_loss,
+    clippy::cast_sign_loss,
+    clippy::module_name_repetitions,
+    clippy::too_many_lines,
+)]
 
 extern crate direct2d;
 extern crate directwrite;
@@ -78,7 +86,7 @@ struct AppState {
 impl AppState {
     fn new() -> Self {
         Self {
-            focused: Default::default(),
+            focused: None,
             views: HashMap::new(),
         }
     }
@@ -170,11 +178,11 @@ impl App {
             "scroll_to" => self.send_view_cmd(EditViewCommands::ScrollTo(
                 params["line"].as_u64().unwrap() as usize,
             )),
-            "available_themes" => (),    // TODO
-            "available_plugins" => (),   // TODO
-            "available_languages" => (), // TODO
-            "config_changed" => (),      // TODO
-            "language_changed" => (),    // TODO
+            "available_themes"
+            | "available_plugins"
+            | "available_languages"
+            | "config_changed"
+            | "language_changed" => (), // TODO
             _ => println!("unhandled core->fe method {}", method),
         }
     }
@@ -188,7 +196,7 @@ struct AppDispatcher {
 impl AppDispatcher {
     fn new() -> Self {
         Self {
-            app: Default::default(),
+            app: Arc::default(),
         }
     }
 

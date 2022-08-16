@@ -111,7 +111,7 @@ impl LineCache {
             } else if op_type == "skip" {
                 let n = op["n"].as_u64().unwrap();
                 for _ in 0..n {
-                    let _ = old_iter.next();
+                    let _skip = old_iter.next();
                 }
             } else if op_type == "invalidate" {
                 let n = op["n"].as_u64().unwrap();
@@ -139,7 +139,7 @@ impl LineCache {
 fn count_utf16(s: &str) -> usize {
     let mut utf16_count = 0;
     for &b in s.as_bytes() {
-        if (b as i8) >= -0x40 {
+        if b as i8 >= -0x40 {
             utf16_count += 1;
         }
         if b >= 0xf0 {

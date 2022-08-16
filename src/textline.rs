@@ -72,7 +72,7 @@ impl TextLine {
     /// Draw the text at the specified coordinate. Does not draw background or cursor.
     ///
     /// Note: the `fg` param will probably go away, as styles will be incorporated
-    /// into the TextLine itself.
+    /// into the [`TextLine`] itself.
     pub fn draw_text<R: RenderTarget>(&self, rt: &mut R, x: f32, y: f32, fg: &SolidColorBrush) {
         rt.draw_text_layout((x, y), &self.layout, fg, default_text_options());
     }
@@ -104,7 +104,7 @@ impl TextLine {
 fn conv_utf16_to_utf8_offset(s: &str, utf16_offset: usize) -> usize {
     let mut utf16_count = 0;
     for (i, &b) in s.as_bytes().iter().enumerate() {
-        if (b as i8) >= -0x40 {
+        if b as i8 >= -0x40 {
             utf16_count += 1;
         }
         if b >= 0xf0 {

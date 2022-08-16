@@ -44,7 +44,7 @@ pub trait Handler {
 
 impl<F: FnOnce(&Value) + Send> Callback for F {
     fn call(self: Box<F>, result: &Value) {
-        (*self)(result)
+        (*self)(result);
     }
 }
 
@@ -73,9 +73,12 @@ impl Core {
                     handler.notification(method, &msg["params"]);
                 } else if let Some(id) = msg["id"].as_u64() {
                     let mut state = rx_core_handle.state.lock().unwrap();
-                    state.pending.remove(&id).map_or_else(|| eprintln!("unexpected result"), |callback| {
-                        callback.call(&msg["result"]);
-                     })
+                    state.pending.remove(&id).map_or_else(
+                        || eprintln!("unexpected result"),
+                        |callback| {
+                            callback.call(&msg["result"]);
+                        },
+                    );
                 } else {
                     println!("got {:?} at rpc level", msg);
                 }
