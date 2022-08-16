@@ -52,12 +52,8 @@ pub fn start_xi_thread() -> (XiPeer, Receiver<Value>) {
     };
     let mut state = XiCore::new();
     let mut rpc_looper = RpcLoop::new(from_core_tx);
-    thread::spawn(move ||
-        rpc_looper.mainloop(|| to_core_rx, &mut state)
-    );
-    let peer = XiPeer {
-        tx: to_core_tx,
-    };
+    thread::spawn(move || rpc_looper.mainloop(|| to_core_rx, &mut state));
+    let peer = XiPeer { tx: to_core_tx };
     (peer, from_core_rx)
 }
 
@@ -86,9 +82,7 @@ impl BufRead for ChanReader {
                 buf.push_str(&s);
                 Ok(s.len())
             }
-            Err(_) => {
-                Ok(0)
-            }
+            Err(_) => Ok(0),
         }
     }
 }
@@ -109,9 +103,9 @@ impl Write for ChanWriter {
     fn write_all(&mut self, buf: &[u8]) -> io::Result<()> {
         let json = serde_json::from_slice::<Value>(buf).unwrap();
         //thread::sleep(Duration::from_secs(1));
-        self.sender.send(json).map_err(|_|
-            io::Error::new(ErrorKind::BrokenPipe, "rpc rx thread lost")
-        )
+        self.sender
+            .send(json)
+            .map_err(|_| io::Error::new(ErrorKind::BrokenPipe, "rpc rx thread lost"))
     }
 }
 

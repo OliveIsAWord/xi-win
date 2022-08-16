@@ -14,11 +14,11 @@
 
 //! The main edit view.
 
-use std::cmp::min;
-use std::ops::Range;
 use std::any::Any;
-use std::sync::{Mutex, Weak};
+use std::cmp::min;
 use std::mem;
+use std::ops::Range;
+use std::sync::{Mutex, Weak};
 
 use serde_json::Value;
 
@@ -30,17 +30,17 @@ use direct2d::RenderTarget;
 use directwrite;
 use directwrite::TextFormat;
 
-use druid_win_shell::window::{M_ALT, M_CTRL, M_SHIFT, MouseButton};
+use druid_win_shell::window::{MouseButton, M_ALT, M_CTRL, M_SHIFT};
 
-use druid::Ui;
 use druid::widget::Widget;
+use druid::Ui;
 
+use druid::KeyVariant;
 use druid::{BoxConstraints, Geometry, LayoutResult};
-use druid::{HandlerCtx, Id, LayoutCtx, MouseEvent, PaintCtx, KeyEvent};
-use druid::{KeyVariant};
+use druid::{HandlerCtx, Id, KeyEvent, LayoutCtx, MouseEvent, PaintCtx};
 
-use rpc::Core;
 use linecache::LineCache;
+use rpc::Core;
 use textline::TextLine;
 
 /// The commands the EditView widget accepts through `poke`.
@@ -70,7 +70,7 @@ pub struct EditView {
     dwrite_factory: directwrite::Factory,
     resources: Option<Resources>,
     scroll_offset: f32,
-    size: (f32, f32),  // in px units
+    size: (f32, f32), // in px units
     viewport: Range<usize>,
     core: Weak<Mutex<Core>>,
     pending: Vec<(Method, Params)>,
@@ -118,9 +118,13 @@ impl Widget for EditView {
         self.resources = Some(resources);
     }
 
-    fn layout(&mut self, bc: &BoxConstraints, _children: &[Id], _size: Option<(f32, f32)>,
-        _ctx: &mut LayoutCtx) -> LayoutResult
-    {
+    fn layout(
+        &mut self,
+        bc: &BoxConstraints,
+        _children: &[Id],
+        _size: Option<(f32, f32)>,
+        _ctx: &mut LayoutCtx,
+    ) -> LayoutResult {
         let size = bc.constrain((0.0, 0.0));
         self.size = size;
         self.update_viewport();
@@ -128,7 +132,13 @@ impl Widget for EditView {
     }
 
     fn mouse(&mut self, event: &MouseEvent, _ctx: &mut HandlerCtx) -> bool {
-        let MouseEvent { x, y, mods: _, which, count } = *event;
+        let MouseEvent {
+            x,
+            y,
+            mods: _,
+            which,
+            count,
+        } = *event;
         if which == MouseButton::Left && count == 1 {
             let (line, col) = self.xy_to_line_col(x, y);
             let params = json!({
@@ -209,9 +219,7 @@ impl Widget for EditView {
 
     fn key(&mut self, event: &KeyEvent, ctx: &mut HandlerCtx) -> bool {
         match event.key {
-            KeyVariant::Vkey(vk) => {
-                return self.keydown(vk, event.mods, ctx)
-            }
+            KeyVariant::Vkey(vk) => return self.keydown(vk, event.mods, ctx),
             KeyVariant::Char(ch) => {
                 self.char(ch as u32, event.mods);
             }
@@ -247,9 +255,18 @@ impl EditView {
             .build()
             .unwrap();
         Resources {
-            fg: SolidColorBrush::create(rt).with_color(0xf0f0ea).build().unwrap(),
-            bg: SolidColorBrush::create(rt).with_color(0x272822).build().unwrap(),
-            sel: SolidColorBrush::create(rt).with_color(0x49483e).build().unwrap(),
+            fg: SolidColorBrush::create(rt)
+                .with_color(0xf0f0ea)
+                .build()
+                .unwrap(),
+            bg: SolidColorBrush::create(rt)
+                .with_color(0x272822)
+                .build()
+                .unwrap(),
+            sel: SolidColorBrush::create(rt)
+                .with_color(0x49483e)
+                .build()
+                .unwrap(),
             text_format,
         }
     }
@@ -355,7 +372,11 @@ impl EditView {
             VK_LEFT => {
                 // TODO: there is a subtle distinction between alt and ctrl
                 let action = if (mods & (M_ALT | M_CTRL)) != 0 {
-                    s(mods, "move_word_left", "move_word_left_and_modify_selection")
+                    s(
+                        mods,
+                        "move_word_left",
+                        "move_word_left_and_modify_selection",
+                    )
                 } else {
                     s(mods, "move_left", "move_left_and_modify_selection")
                 };
@@ -364,37 +385,55 @@ impl EditView {
             VK_RIGHT => {
                 // TODO: there is a subtle distinction between alt and ctrl
                 let action = if (mods & (M_ALT | M_CTRL)) != 0 {
-                    s(mods, "move_word_right", "move_word_right_and_modify_selection")
+                    s(
+                        mods,
+                        "move_word_right",
+                        "move_word_right_and_modify_selection",
+                    )
                 } else {
                     s(mods, "move_right", "move_right_and_modify_selection")
                 };
                 self.send_action(action);
             }
             VK_PRIOR => {
-                self.send_action(s(mods, "scroll_page_up",
-                    "page_up_and_modify_selection"));
+                self.send_action(s(mods, "scroll_page_up", "page_up_and_modify_selection"));
             }
             VK_NEXT => {
-                self.send_action(s(mods, "scroll_page_down",
-                    "page_down_and_modify_selection"));
+                self.send_action(s(
+                    mods,
+                    "scroll_page_down",
+                    "page_down_and_modify_selection",
+                ));
             }
             VK_HOME => {
                 let action = if (mods & M_CTRL) != 0 {
-                    s(mods, "move_to_beginning_of_document",
-                        "move_to_beginning_of_document_and_modify_selection")
+                    s(
+                        mods,
+                        "move_to_beginning_of_document",
+                        "move_to_beginning_of_document_and_modify_selection",
+                    )
                 } else {
-                    s(mods, "move_to_left_end_of_line",
-                        "move_to_left_end_of_line_and_modify_selection")
+                    s(
+                        mods,
+                        "move_to_left_end_of_line",
+                        "move_to_left_end_of_line_and_modify_selection",
+                    )
                 };
                 self.send_action(action);
             }
             VK_END => {
                 let action = if (mods & M_CTRL) != 0 {
-                    s(mods, "move_to_end_of_document",
-                        "move_to_end_of_document_and_modify_selection")
+                    s(
+                        mods,
+                        "move_to_end_of_document",
+                        "move_to_end_of_document_and_modify_selection",
+                    )
                 } else {
-                    s(mods, "move_to_right_end_of_line",
-                        "move_to_right_end_of_line_and_modify_selection")
+                    s(
+                        mods,
+                        "move_to_right_end_of_line",
+                        "move_to_right_end_of_line_and_modify_selection",
+                    )
                 };
                 self.send_action(action);
             }
@@ -424,7 +463,7 @@ impl EditView {
                 if mods == M_CTRL {
                     self.send_action("outdent");
                 } else {
-                    return false
+                    return false;
                 }
             }
             VK_OEM_6 => {
@@ -432,12 +471,10 @@ impl EditView {
                 if mods == M_CTRL {
                     self.send_action("indent");
                 } else {
-                    return false
+                    return false;
                 }
             }
-            _ => {
-                return false
-            }
+            _ => return false,
         }
         true
     }
@@ -451,8 +488,7 @@ impl EditView {
     // }
 
     fn constrain_scroll(&mut self) {
-        let max_scroll = TOP_PAD + LINE_SPACE *
-            (self.line_cache.height().saturating_sub(1)) as f32;
+        let max_scroll = TOP_PAD + LINE_SPACE * (self.line_cache.height().saturating_sub(1)) as f32;
         if self.scroll_offset < 0.0 {
             self.scroll_offset = 0.0;
         } else if self.scroll_offset > max_scroll {
@@ -463,7 +499,9 @@ impl EditView {
     // Takes y in screen-space px.
     fn y_to_line(&self, y: f32) -> usize {
         let mut line = (y + self.scroll_offset - TOP_PAD) / LINE_SPACE;
-        if line < 0.0 { line = 0.0; }
+        if line < 0.0 {
+            line = 0.0;
+        }
         let line = line.floor() as usize;
         min(line, self.line_cache.height())
     }
@@ -471,9 +509,10 @@ impl EditView {
     /// Takes x, y in screen-space px, returns line number and utf8 offset within line.
     fn xy_to_line_col(&self, x: f32, y: f32) -> (usize, usize) {
         let line_num = self.y_to_line(y);
-        let col = if let (Some(textline), Some(line)) =
-            (self.get_text_line(line_num), self.line_cache.get_line(line_num))
-        {
+        let col = if let (Some(textline), Some(line)) = (
+            self.get_text_line(line_num),
+            self.line_cache.get_line(line_num),
+        ) {
             textline.hit_test(x - LEFT_PAD, 0.0, line.text())
         } else {
             0
@@ -509,5 +548,9 @@ impl EditView {
 
 // Helper function for choosing between normal and shifted action
 fn s<'a>(mods: u32, normal: &'a str, shifted: &'a str) -> &'a str {
-    if (mods & M_SHIFT) != 0 { shifted } else { normal }
+    if (mods & M_SHIFT) != 0 {
+        shifted
+    } else {
+        normal
+    }
 }

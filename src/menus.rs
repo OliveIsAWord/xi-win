@@ -65,16 +65,25 @@ pub fn create_menus() -> Menu {
     edit_menu.add_item(MenuEntries::Transpose as u32, "Transpose");
     menubar.add_dropdown(edit_menu, "&Edit");
     let mut selection_menu = Menu::new();
-    selection_menu.add_item(MenuEntries::AddCursorAbove as u32, "Add Cursor Above\tCtrl+Alt+Up");
-    selection_menu.add_item(MenuEntries::AddCursorBelow as u32, "Add Cursor Below\tCtrl+Alt+Down");
-    selection_menu.add_item(MenuEntries::SingleSelection as u32, "Single Selection\tEscape");
+    selection_menu.add_item(
+        MenuEntries::AddCursorAbove as u32,
+        "Add Cursor Above\tCtrl+Alt+Up",
+    );
+    selection_menu.add_item(
+        MenuEntries::AddCursorBelow as u32,
+        "Add Cursor Below\tCtrl+Alt+Down",
+    );
+    selection_menu.add_item(
+        MenuEntries::SingleSelection as u32,
+        "Single Selection\tEscape",
+    );
     selection_menu.add_item(MenuEntries::SelectAll as u32, "Select All\tCtrl+A");
     menubar.add_dropdown(selection_menu, "&Selection");
     menubar
 }
 
 pub fn set_accel(runloop: &mut RunLoop) {
-    let accel = accel!{
+    let accel = accel! {
         FCONTROL, 'O', MenuEntries::Open,
         FCONTROL, 'S', MenuEntries::Save,
         FCONTROL | FSHIFT, 'S', MenuEntries::SaveAs,

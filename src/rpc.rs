@@ -15,8 +15,8 @@
 //! Front-end side implementation of RPC protocol.
 
 use std::collections::BTreeMap;
-use std::sync::{Arc, Mutex};
 use std::sync::mpsc::Receiver;
+use std::sync::{Arc, Mutex};
 use std::thread;
 
 use serde_json::Value;
@@ -55,14 +55,17 @@ impl Core {
     /// The handler is invoked for incoming RPC notifications. Note that
     /// it must be `Send` because it is called from a dedicated thread.
     pub fn new<H>(xi_peer: XiPeer, rx: Receiver<Value>, handler: H) -> Core
-        where H: Handler + Send + 'static
+    where
+        H: Handler + Send + 'static,
     {
         let state = CoreState {
             xi_peer,
             id: 0,
             pending: BTreeMap::new(),
         };
-        let core = Core { state: Arc::new(Mutex::new(state)) };
+        let core = Core {
+            state: Arc::new(Mutex::new(state)),
+        };
         let rx_core_handle = core.clone();
         thread::spawn(move || {
             while let Ok(msg) = rx.recv() {
@@ -94,7 +97,8 @@ impl Core {
 
     /// Calls the callback with the result (from a different thread).
     pub fn send_request<F>(&mut self, method: &str, params: &Value, callback: F)
-        where F: FnOnce(&Value) + Send + 'static
+    where
+        F: FnOnce(&Value) + Send + 'static,
     {
         let mut state = self.state.lock().unwrap();
         let id = state.id;

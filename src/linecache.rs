@@ -14,9 +14,9 @@
 
 //! The line cache (text, styles and cursors for a view).
 
+use serde_json::Value;
 use std::mem;
 use std::ops::Range;
-use serde_json::Value;
 
 pub struct Line {
     text: String,
@@ -50,7 +50,7 @@ impl Line {
                 let end = start + triple[1].as_i64().unwrap();
                 // TODO: count utf from last end, if <=
                 let start_utf16 = count_utf16(&text[..start as usize]);
-                let end_utf16 = start_utf16 + count_utf16(&text[start as usize .. end as usize]);
+                let end_utf16 = start_utf16 + count_utf16(&text[start as usize..end as usize]);
                 let style_id = triple[2].as_u64().unwrap() as usize;
                 let style_span = StyleSpan {
                     style_id,
@@ -60,7 +60,11 @@ impl Line {
                 ix = end;
             }
         }
-        Line { text, cursor, styles }
+        Line {
+            text,
+            cursor,
+            styles,
+        }
     }
 
     pub fn text(&self) -> &str {
@@ -77,14 +81,12 @@ impl Line {
 }
 
 pub struct LineCache {
-    lines: Vec<Option<Line>>
+    lines: Vec<Option<Line>>,
 }
 
 impl LineCache {
     pub fn new() -> LineCache {
-        LineCache {
-            lines: Vec::new(),
-        }
+        LineCache { lines: Vec::new() }
     }
 
     fn push_opt_line(&mut self, line: Option<Line>) {
@@ -137,8 +139,12 @@ impl LineCache {
 fn count_utf16(s: &str) -> usize {
     let mut utf16_count = 0;
     for &b in s.as_bytes() {
-        if (b as i8) >= -0x40 { utf16_count += 1; }
-        if b >= 0xf0 { utf16_count += 1; }
+        if (b as i8) >= -0x40 {
+            utf16_count += 1;
+        }
+        if b >= 0xf0 {
+            utf16_count += 1;
+        }
     }
     utf16_count
 }
