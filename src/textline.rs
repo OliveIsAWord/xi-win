@@ -16,12 +16,11 @@
 
 use direct2d::brush::SolidColorBrush;
 use direct2d::RenderTarget;
-use directwrite;
 use directwrite::{TextFormat, TextLayout};
 
 use druid_win_shell::util::default_text_options;
 
-use linecache::{Line, StyleSpan};
+use crate::linecache::{Line, StyleSpan};
 
 pub struct TextLine {
     layout: TextLayout,

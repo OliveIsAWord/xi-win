@@ -30,7 +30,6 @@ use winapi::um::winuser::{
 use direct2d::brush::SolidColorBrush;
 use direct2d::math::RectF;
 use direct2d::RenderTarget;
-use directwrite;
 use directwrite::TextFormat;
 
 use druid_win_shell::window::{MouseButton, M_ALT, M_CTRL, M_SHIFT};
@@ -42,9 +41,9 @@ use druid::KeyVariant;
 use druid::{BoxConstraints, Geometry, LayoutResult};
 use druid::{HandlerCtx, Id, KeyEvent, LayoutCtx, MouseEvent, PaintCtx};
 
-use linecache::LineCache;
-use rpc::Core;
-use textline::TextLine;
+use crate::linecache::LineCache;
+use crate::rpc::Core;
+use crate::textline::TextLine;
 
 /// The commands the [`EditView`] widget accepts through `poke`.
 pub enum EditViewCommands {

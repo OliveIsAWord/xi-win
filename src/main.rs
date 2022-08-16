@@ -26,6 +26,7 @@
     clippy::cast_sign_loss,
     clippy::module_name_repetitions,
     clippy::too_many_lines,
+    clippy::cognitive_complexity,
 )]
 
 extern crate direct2d;
@@ -54,10 +55,10 @@ use std::sync::{Arc, Mutex};
 
 use serde_json::Value;
 
-use edit_view::EditView;
-use menus::MenuEntries;
-use rpc::{Core, Handler};
-use xi_thread::start_xi_thread;
+use crate::edit_view::EditView;
+use crate::menus::MenuEntries;
+use crate::rpc::{Core, Handler};
+use crate::xi_thread::start_xi_thread;
 
 use druid_win_shell::win_main::{self};
 use druid_win_shell::window::{Cursor, IdleHandle, WindowBuilder};
@@ -66,7 +67,7 @@ use druid::Id;
 use druid::{FileDialogOptions, FileDialogType};
 use druid::{UiMain, UiState};
 
-use edit_view::EditViewCommands;
+use crate::edit_view::EditViewCommands;
 
 type ViewId = String;
 

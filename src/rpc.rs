@@ -21,7 +21,7 @@ use std::thread;
 
 use serde_json::Value;
 
-use xi_thread::XiPeer;
+use crate::xi_thread::XiPeer;
 
 #[derive(Clone)]
 pub struct Core {
