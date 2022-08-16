@@ -67,7 +67,7 @@ impl Core {
         thread::spawn(move || {
             while let Ok(msg) = rx.recv() {
                 if let Value::String(ref method) = msg["method"] {
-                    handler.notification(&method, &msg["params"]);
+                    handler.notification(method, &msg["params"]);
                 } else if let Some(id) = msg["id"].as_u64() {
                     let mut state = rx_core_handle.state.lock().unwrap();
                     if let Some(callback) = state.pending.remove(&id) {

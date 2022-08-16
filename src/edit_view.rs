@@ -150,14 +150,14 @@ impl Widget for EditView {
                     self.update_viewport();
 
                     // Fire off the pending notifications
-                    let pending = mem::replace(&mut self.pending, Vec::new());
+                    let pending = mem::take(&mut self.pending);
                     for notification in pending {
                         let (method, params) = notification;
                         self.send_edit_cmd(&method, &params);
                     }
                 }
                 EditViewCommands::ApplyUpdate(update) => {
-                    self.apply_update(&update);
+                    self.apply_update(update);
                     ctx.invalidate();
                 }
                 EditViewCommands::ScrollTo(line) => {
@@ -250,7 +250,7 @@ impl EditView {
             fg: SolidColorBrush::create(rt).with_color(0xf0f0ea).build().unwrap(),
             bg: SolidColorBrush::create(rt).with_color(0x272822).build().unwrap(),
             sel: SolidColorBrush::create(rt).with_color(0x49483e).build().unwrap(),
-            text_format: text_format,
+            text_format,
         }
     }
 
@@ -266,7 +266,7 @@ impl EditView {
     fn get_text_line(&self, line_num: usize) -> Option<TextLine> {
         self.line_cache.get_line(line_num).map(|line| {
             let format = &self.resources.as_ref().unwrap().text_format;
-            TextLine::create_from_line(&line, &self.dwrite_factory, format)
+            TextLine::create_from_line(line, &self.dwrite_factory, format)
         })
     }
 
@@ -288,15 +288,12 @@ impl EditView {
     fn send_edit_cmd(&mut self, method: &str, params: &Value) {
         // TODO: When let_chains lands, this will be easier.
         let core = self.core.upgrade();
-        if core.is_some() && self.view_id.is_some() {
-            let view_id = &self.view_id.clone().unwrap();
+        if let (Some(core), Some(view_id)) = (core, self.view_id.as_ref()) {
             let edit_params = json!({
                 "method": method,
                 "params": params,
                 "view_id": view_id,
             });
-
-            let core = core.unwrap();
             core.lock().unwrap().send_notification("edit", &edit_params);
             // NOTE: For debugging, could be replaced by trace logging
             // println!("fe->core: {}", json!({

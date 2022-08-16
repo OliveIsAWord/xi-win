@@ -134,12 +134,10 @@ impl App {
     fn req_new_view(&self, filename: Option<&str>, handle: IdleHandle) {
         let mut params = json!({});
 
-        let filename = if filename.is_some() {
-            params["file_path"] = json!(filename.unwrap());
-            Some(filename.unwrap().to_string())
-        } else {
-            None
-        };
+        let filename = filename.map(|f| {
+            params["file_path"] = json!(f);
+            f.to_string()
+        });
 
         let edit_view = 0;
         let core = Arc::downgrade(&self.core);
@@ -195,7 +193,7 @@ impl AppDispatcher {
 
     fn set_menu_listeners(&self, state: &mut UiState) {
         let app = self.app.clone();
-        state.set_command_listener(move |cmd, mut ctx| {            
+        state.set_command_listener(move |cmd, mut ctx| {
             match cmd {
                 cmd if cmd == MenuEntries::Exit as u32 => {
                     ctx.close();
