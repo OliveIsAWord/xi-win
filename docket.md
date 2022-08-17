@@ -1,6 +1,6 @@
 # TODO
 - [x] Check all TODO comments and turn them into TODO(Olive).
-- [ ] Remove copyright notices.
+- [x] Remove copyright notices.
 - [ ] Code review every single file in the repo.
 
 # Ancillary Professional Items
