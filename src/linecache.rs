@@ -48,7 +48,7 @@ impl Line {
             for triple in arr.chunks(3) {
                 let start = ix + triple[0].as_i64().unwrap();
                 let end = start + triple[1].as_i64().unwrap();
-                // TODO: count utf from last end, if <=
+                // TODO(Olive): count utf from last end, if <=
                 let start_utf16 = count_utf16(&text[..start as usize]);
                 let end_utf16 = start_utf16 + count_utf16(&text[start as usize..end as usize]);
                 let style_id = triple[2].as_u64().unwrap() as usize;

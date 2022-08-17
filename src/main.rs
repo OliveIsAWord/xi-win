@@ -15,7 +15,7 @@
 //! The main module for the xi editor front end.
 
 // NOTE: This disables stdout, so no println :(
-// TODO: If we checked what GetStdHandle returns for stdout and see
+// TODO(Olive): If we checked what GetStdHandle returns for stdout and see
 // that it is an invalid handle (either -1 or 0), then we can open up
 // up a file to log stdout and SetStdHandle.
 #![windows_subsystem = "windows"]
@@ -26,7 +26,7 @@
     clippy::cast_sign_loss,
     clippy::module_name_repetitions,
     clippy::too_many_lines,
-    clippy::cognitive_complexity,
+    clippy::cognitive_complexity
 )]
 
 extern crate direct2d;
@@ -183,7 +183,7 @@ impl App {
             | "available_plugins"
             | "available_languages"
             | "config_changed"
-            | "language_changed" => (), // TODO
+            | "language_changed" => (), // TODO(Olive)
             _ => println!("unhandled core->fe method {}", method),
         }
     }
@@ -287,7 +287,7 @@ impl AppDispatcher {
                         app.send_view_cmd(EditViewCommands::Redo);
                     }
                 }
-                // TODO: cut, copy, paste (requires pasteboard)
+                // TODO(Olive): cut, copy, paste (requires pasteboard)
                 cmd if cmd == MenuEntries::UpperCase as u32 => {
                     if let Some(app) = app.lock().unwrap().as_ref() {
                         app.send_view_cmd(EditViewCommands::UpperCase);
@@ -355,7 +355,7 @@ fn extract_string_from_file_dialog(
 }
 
 fn build_app(state: &mut UiState) {
-    // todo: widgets which support tabs and split panes
+    // TODO(Olive): widgets which support tabs and split panes
     let edit_view = EditView::new().ui(state);
     state.set_root(edit_view);
     state.set_focus(Some(edit_view));

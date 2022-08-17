@@ -91,7 +91,7 @@ const LINE_SPACE: f32 = 17.0;
 
 impl Widget for EditView {
     fn paint(&mut self, paint_ctx: &mut PaintCtx, geom: &Geometry) {
-        // todo: Cache resources, and flush cache when the render target is re-created.
+        // TODO(Olive): Cache resources, and flush cache when the render target is re-created.
         self.size = geom.size;
         let resources = self.create_resources(paint_ctx);
         let rt = paint_ctx.render_target();
@@ -305,9 +305,7 @@ impl EditView {
     }
 
     fn send_edit_cmd(&mut self, method: &str, params: &Value) {
-        // TODO: When let_chains lands, this will be easier.
-        let core = self.core.upgrade();
-        if let (Some(core), Some(view_id)) = (core, self.view_id.as_ref()) {
+        if let Some((core, view_id)) = self.core.upgrade().zip(self.view_id.as_ref()) {
             let edit_params = json!({
                 "method": method,
                 "params": params,
@@ -333,11 +331,11 @@ impl EditView {
         // Handle special keys here
         match vk_code {
             VK_RETURN => {
-                // TODO: modifiers are variants of open
+                // TODO(Olive): modifiers are variants of open
                 self.send_action("insert_newline");
             }
             VK_TAB => {
-                // TODO: modified versions
+                // TODO(Olive): modified versions
                 self.send_action("insert_tab");
             }
             VK_UP => {
@@ -352,7 +350,7 @@ impl EditView {
                     } else {
                         s(mods, "move_up", "move_up_and_modify_selection")
                     };
-                    // TODO: swap line up is ctrl + shift
+                    // TODO(Olive): swap line up is ctrl + shift
                     self.send_action(action);
                 }
             }
@@ -372,7 +370,7 @@ impl EditView {
                 }
             }
             VK_LEFT => {
-                // TODO: there is a subtle distinction between alt and ctrl
+                // TODO(Olive): there is a subtle distinction between alt and ctrl
                 let action = if (mods & (M_ALT | M_CTRL)) == 0 {
                     s(mods, "move_left", "move_left_and_modify_selection")
                 } else {
@@ -385,7 +383,7 @@ impl EditView {
                 self.send_action(action);
             }
             VK_RIGHT => {
-                // TODO: there is a subtle distinction between alt and ctrl
+                // TODO(Olive): there is a subtle distinction between alt and ctrl
                 let action = if (mods & (M_ALT | M_CTRL)) == 0 {
                     s(mods, "move_right", "move_right_and_modify_selection")
                 } else {
@@ -453,7 +451,7 @@ impl EditView {
             }
             VK_DELETE => {
                 let action = if (mods & M_CTRL) == 0 {
-                    // TODO: shift-delete should be "delete line"
+                    // TODO(Olive): shift-delete should be "delete line"
                     "delete_forward"
                 } else {
                     s(mods, "delete_word_forward", "delete_to_end_of_paragraph")
@@ -482,7 +480,7 @@ impl EditView {
     }
 
     // pub fn mouse_wheel(&mut self, delta: i32, _mods: u32) {
-    //     // TODO: scale properly, taking SPI_GETWHEELSCROLLLINES into account
+    //     // TODO(Olive): scale properly, taking SPI_GETWHEELSCROLLLINES into account
     //     let scroll_scaling = 0.5;
     //     self.scroll_offset -= (delta as f32) * scroll_scaling;
     //     self.constrain_scroll();
@@ -538,6 +536,7 @@ impl EditView {
         let bottom_slop = 20.0;
         if y < self.scroll_offset {
             self.scroll_offset = y;
+        // TODO(Olive) Get rid of this second check to `y`? It's a float after all.
         } else if y > self.scroll_offset + self.size.1 - bottom_slop {
             self.scroll_offset = y - (self.size.1 - bottom_slop);
         }
