@@ -12,7 +12,7 @@ pub struct Line {
     styles: Vec<StyleSpan>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct StyleSpan {
     pub style_id: usize,
     /// Range of span, in units of utf-16 code units

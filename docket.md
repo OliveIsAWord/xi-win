@@ -2,7 +2,8 @@
 - [x] Check all TODO comments and turn them into TODO(Olive).
 - [x] Remove copyright notices.
 - [x] Vec::new -> vec![]
-- [ ] Warn on missing Debug impl.
+- [x] Add Debug impls.
+- [x] Alphabetize derives.
 - [ ] Add missing docs.
 - [ ] Code review every single file in the repo.
 Done:

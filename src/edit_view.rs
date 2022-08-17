@@ -2,6 +2,7 @@
 
 use std::any::Any;
 use std::cmp::min;
+use std::fmt;
 use std::mem;
 use std::ops::Range;
 use std::sync::{Mutex, Weak};
@@ -32,6 +33,7 @@ use crate::rpc::Core;
 use crate::textline::TextLine;
 
 /// The commands the [`EditView`] widget accepts through `poke`.
+#[derive(Debug)]
 pub enum EditViewCommands {
     ViewId(String),
     ApplyUpdate(Value),
@@ -64,11 +66,33 @@ pub struct EditView {
     pending: Vec<(Method, Params)>,
 }
 
+impl fmt::Debug for EditView {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("EditView")
+            .field("view_id", &self.view_id)
+            .field("line_cache", &self.line_cache)
+            .field("dwrite_factory", &"...")
+            .field("resources", &self.resources)
+            .field("scroll_offset", &self.scroll_offset)
+            .field("size", &self.size)
+            .field("viewport", &self.viewport)
+            .field("core", &self.core)
+            .field("pending", &self.pending)
+            .finish()
+    }
+}
+
 struct Resources {
     fg: SolidColorBrush,
     bg: SolidColorBrush,
     sel: SolidColorBrush,
     text_format: TextFormat,
+}
+
+impl fmt::Debug for Resources {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Resources {{ ... }}")
+    }
 }
 
 const TOP_PAD: f32 = 6.0;

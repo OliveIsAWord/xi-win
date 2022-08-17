@@ -53,6 +53,8 @@ use druid::Id;
 use druid::{FileDialogOptions, FileDialogType};
 use druid::{UiMain, UiState};
 
+use std::fmt;
+
 use crate::edit_view::EditViewCommands;
 
 type ViewId = String;
@@ -64,7 +66,17 @@ struct ViewState {
     handle: IdleHandle,
 }
 
-#[derive(Clone)]
+impl fmt::Debug for ViewState {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ViewState")
+            .field("id", &self.id)
+            .field("filename", &self.filename)
+            .field("handle", &"...")
+            .finish()
+    }
+}
+
+#[derive(Clone, Debug)]
 struct AppState {
     focused: Option<ViewId>,
     views: HashMap<ViewId, ViewState>,
@@ -90,7 +102,7 @@ impl AppState {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct App {
     core: Arc<Mutex<Core>>,
     state: Arc<Mutex<AppState>>,
@@ -175,7 +187,7 @@ impl App {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct AppDispatcher {
     app: Arc<Mutex<Option<App>>>,
 }

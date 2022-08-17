@@ -3,8 +3,8 @@
 use direct2d::brush::SolidColorBrush;
 use direct2d::RenderTarget;
 use directwrite::{TextFormat, TextLayout};
-
 use druid_win_shell::util::default_text_options;
+use std::fmt;
 
 use crate::linecache::{Line, StyleSpan};
 
@@ -17,6 +17,16 @@ pub struct TextLine {
     /// Style spans (internally in utf-16 code units). Arguably could be resolved
     /// to floats.
     styles: Vec<StyleSpan>,
+}
+
+impl fmt::Debug for TextLine {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("TextLine")
+            .field("cursor", &self.cursor)
+            .field("styles", &self.styles)
+            .field("layout", &"...")
+            .finish()
+    }
 }
 
 impl TextLine {
@@ -43,8 +53,12 @@ impl TextLine {
 
     pub fn draw_bg<R: RenderTarget>(&self, rt: &mut R, x: f32, y: f32, bg: &SolidColorBrush) {
         for style in &self.styles {
-            let maybe_start = self.layout.hit_test_text_position(style.range.start as u32, true);
-            let maybe_end = self.layout.hit_test_text_position(style.range.end as u32, true);
+            let maybe_start = self
+                .layout
+                .hit_test_text_position(style.range.start as u32, true);
+            let maybe_end = self
+                .layout
+                .hit_test_text_position(style.range.end as u32, true);
             if let Some((start, end)) = maybe_start.zip(maybe_end) {
                 rt.fill_rectangle((x + start.point_x, y, x + end.point_x, y + 17.0), bg);
             }

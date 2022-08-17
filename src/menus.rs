@@ -6,6 +6,7 @@ use winapi::um::winuser::{ACCEL, FCONTROL, FSHIFT, FVIRTKEY};
 use druid_win_shell::menu::Menu;
 use druid_win_shell::win_main::RunLoop;
 
+#[derive(Debug)]
 #[repr(u32)]
 pub enum MenuEntries {
     // File menu entries

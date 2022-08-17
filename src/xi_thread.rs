@@ -15,6 +15,7 @@ use serde_json::{self, Value};
 use xi_core_lib::XiCore;
 use xi_rpc::RpcLoop;
 
+#[derive(Debug)]
 pub struct XiPeer {
     tx: Sender<String>,
 }
@@ -43,6 +44,7 @@ pub fn start_xi_thread() -> (XiPeer, Receiver<Value>) {
     (peer, from_core_rx)
 }
 
+#[derive(Debug)]
 struct ChanReader(Receiver<String>);
 
 impl Read for ChanReader {
@@ -73,6 +75,7 @@ impl BufRead for ChanReader {
     }
 }
 
+#[derive(Debug)]
 struct ChanWriter {
     sender: Sender<Value>,
 }
@@ -98,6 +101,7 @@ impl Write for ChanWriter {
 // We're not using the semaphore for now, but it might come in handy at
 // some point.
 /*
+#[derive(Debug)]
 pub struct Semaphore(HANDLE);
 unsafe impl Send for Semaphore {}
 

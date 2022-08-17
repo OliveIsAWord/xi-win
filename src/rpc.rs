@@ -1,6 +1,7 @@
 //! Front-end side implementation of RPC protocol.
 
 use std::collections::BTreeMap;
+use std::fmt;
 use std::sync::mpsc::Receiver;
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -9,7 +10,7 @@ use serde_json::Value;
 
 use crate::xi_thread::XiPeer;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Core {
     state: Arc<Mutex<CoreState>>,
 }
@@ -18,6 +19,16 @@ struct CoreState {
     xi_peer: XiPeer,
     id: u64,
     pending: BTreeMap<u64, Box<dyn Callback>>,
+}
+
+impl fmt::Debug for CoreState {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("CoreState")
+            .field("xi_peer", &self.xi_peer)
+            .field("id", &self.id)
+            .field("pending", &"...")
+            .finish()
+    }
 }
 
 trait Callback: Send {
