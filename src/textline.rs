@@ -33,22 +33,19 @@ impl TextLine {
             .with_width(1e6)
             .with_height(1e6)
             .build()
-            .unwrap();
+            .expect("failed to construct text layout");
         Self {
             layout,
-            cursor: line.cursor().to_owned(),
+            cursor: line.cursor().to_vec(),
             styles: line.styles().to_vec(),
         }
     }
 
     pub fn draw_bg<R: RenderTarget>(&self, rt: &mut R, x: f32, y: f32, bg: &SolidColorBrush) {
         for style in &self.styles {
-            if let (Some(start), Some(end)) = (
-                self.layout
-                    .hit_test_text_position(style.range.start as u32, true),
-                self.layout
-                    .hit_test_text_position(style.range.end as u32, true),
-            ) {
+            let maybe_start = self.layout.hit_test_text_position(style.range.start as u32, true);
+            let maybe_end = self.layout.hit_test_text_position(style.range.end as u32, true);
+            if let Some((start, end)) = maybe_start.zip(maybe_end) {
                 rt.fill_rectangle((x + start.point_x, y, x + end.point_x, y + 17.0), bg);
             }
         }
@@ -89,6 +86,7 @@ impl TextLine {
 fn conv_utf16_to_utf8_offset(s: &str, utf16_offset: usize) -> usize {
     let mut utf16_count = 0;
     for (i, &b) in s.as_bytes().iter().enumerate() {
+        // TODO(Olive) - I can fix you.
         if b as i8 >= -0x40 {
             utf16_count += 1;
         }

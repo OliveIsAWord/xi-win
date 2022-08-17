@@ -1,7 +1,19 @@
 # TODO
 - [x] Check all TODO comments and turn them into TODO(Olive).
 - [x] Remove copyright notices.
+- [x] Vec::new -> vec![]
+- [ ] Warn on missing Debug impl.
+- [ ] Add missing docs.
 - [ ] Code review every single file in the repo.
+Done:
+    linecache
+    textline
+Current:
+Future:
+    rpc
+    xi_thread
+    main
+    edit_view
 
 # Ancillary Professional Items
 - [ ] Establish MSRV.
